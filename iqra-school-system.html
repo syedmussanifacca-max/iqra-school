@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>IQRA Public School — Records System</title>
+<style>
+:root{
+  --green:#0F4C3A; --green-dk:#0A362A; --gold:#B8860B; --gold-lt:#D9A441;
+  --bg:#FBF9F3; --card:#FFFFFF; --ink:#1C2420; --muted:#5B685F; --line:#DCE3DB;
+  --danger:#A23B32;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --bg:#12160F; --card:#1B211A; --ink:#EAEFE8; --muted:#9DAA9F; --line:#2C352A; }
+}
+:root[data-theme="dark"]{ --bg:#12160F; --card:#1B211A; --ink:#EAEFE8; --muted:#9DAA9F; --line:#2C352A; }
+html{scroll-padding-top:env(safe-area-inset-top,0px);}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Georgia,'Times New Roman',serif;min-height:100%;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='110' height='110'%3E%3Cg fill='none' stroke='rgb(184,134,11)' stroke-width='2' opacity='0.10'%3E%3Cpath d='M18 68 Q18 54 32 54 Q46 54 46 68 M46 68 Q46 54 60 54 Q74 54 74 68 M46 54 L46 70'/%3E%3Cline x1='85' y1='20' x2='85' y2='34'/%3E%3Cline x1='79' y1='22' x2='91' y2='22'/%3E%3C/g%3E%3C/svg%3E");
+  background-repeat:repeat; background-attachment:fixed;
+}
+header{background:var(--green);color:#F3EFE1;padding:18px 20px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:5;padding-top:calc(18px + env(safe-area-inset-top,0px));}
+.crest{width:44px;height:44px;border-radius:50%;background:var(--gold);color:var(--green-dk);display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:18px;flex-shrink:0;font-family:Georgia,serif;}
+header h1{font-size:1.15rem;margin:0;line-height:1.3;}
+header p{margin:2px 0 0;font-size:.78rem;color:#D8CFA8;font-family:system-ui,sans-serif;}
+nav{display:flex;gap:2px;overflow-x:auto;background:var(--green-dk);padding:0 8px;}
+nav button{background:none;border:none;color:#D8CFA8;padding:12px 14px;font-family:system-ui,sans-serif;font-size:.85rem;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;}
+nav button.active{color:#fff;border-bottom-color:var(--gold);}
+main{max-width:760px;margin:0 auto;padding:20px 16px 60px;}
+.card{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:20px;margin-bottom:16px;}
+h2{font-size:1.2rem;margin:0 0 4px;color:var(--green);}
+.sub{color:var(--muted);font-family:system-ui,sans-serif;font-size:.85rem;margin:0 0 16px;}
+label{display:block;font-family:system-ui,sans-serif;font-size:.78rem;color:var(--muted);margin:10px 0 3px;}
+input,select,textarea{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:4px;background:var(--bg);color:var(--ink);font-family:system-ui,sans-serif;font-size:.92rem;}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:0 14px;}
+@media(max-width:480px){.row{grid-template-columns:1fr;}}
+.btn{margin-top:16px;background:var(--green);color:#fff;border:none;padding:11px 18px;border-radius:4px;font-family:system-ui,sans-serif;font-weight:600;cursor:pointer;font-size:.9rem;}
+.btn.gold{background:var(--gold);color:var(--green-dk);}
+.btn.ghost{background:none;border:1px solid var(--line);color:var(--ink);}
+.btn.danger{background:none;border:1px solid var(--danger);color:var(--danger);}
+table{width:100%;border-collapse:collapse;font-family:system-ui,sans-serif;font-size:.85rem;overflow-x:auto;display:block;}
+th,td{text-align:left;padding:8px;border-bottom:1px solid var(--line);white-space:nowrap;}
+th{color:var(--muted);font-weight:600;}
+.doc{border:2px solid var(--green);border-radius:4px;padding:20px;margin-top:16px;}
+.doc-head{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid var(--gold);padding-bottom:10px;margin-bottom:14px;}
+.doc-head h3{margin:0;color:var(--green);font-size:1.1rem;}
+.doc-head .no{font-family:system-ui,sans-serif;font-size:.85rem;text-align:right;}
+.doc table td{padding:6px 4px;}
+.doc .total{font-size:1.1rem;font-weight:bold;color:var(--green);}
+.sign{display:flex;justify-content:space-between;margin-top:40px;font-family:system-ui,sans-serif;font-size:.8rem;}
+.sign div{border-top:1px solid var(--ink);padding-top:4px;width:150px;text-align:center;}
+.actions{display:flex;gap:10px;flex-wrap:wrap;}
+.empty{color:var(--muted);font-family:system-ui,sans-serif;font-size:.85rem;text-align:center;padding:24px 0;}
+#login{position:fixed;inset:0;background:var(--bg);z-index:50;overflow-y:auto;}
+.login-hero{position:relative;height:260px;overflow:hidden;background:linear-gradient(180deg,rgba(10,54,42,.45),rgba(10,54,42,.8)),radial-gradient(circle at 25% 20%,rgb(217,164,65) 0%,rgb(15,76,58) 65%);}
+.login-hero svg.scene{position:absolute;inset:0;width:100%;height:100%;}
+.login-hero .htext{position:relative;z-index:2;text-align:center;color:#fff;padding-top:56px;font-family:Georgia,serif;}
+.login-hero .htext h1{margin:0;font-size:1.9rem;text-shadow:0 2px 6px rgba(0,0,0,.4);}
+.login-hero .htext p{margin:6px 0 0;font-family:system-ui,sans-serif;font-size:.95rem;color:rgb(217,164,65);}
+.login-hero .wave{position:absolute;bottom:-1px;left:0;width:100%;height:44px;z-index:2;}
+.login-box-wrap{display:flex;justify-content:center;padding:0 20px 40px;margin-top:-10px;}
+.login-box{background:var(--card);border-radius:8px;padding:28px;width:100%;max-width:320px;text-align:center;}
+.login-box .crest{margin:0 auto 12px;width:56px;height:56px;font-size:22px;}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:14px 10px;text-align:center;}
+.kpi .n{font-size:1.6rem;font-weight:bold;color:var(--green);font-family:system-ui,sans-serif;}
+.kpi .l{font-size:.72rem;color:var(--muted);font-family:system-ui,sans-serif;}
+.hdr-right{margin-left:auto;text-align:right;font-family:system-ui,sans-serif;}
+.hdr-right .dept{font-size:.72rem;color:var(--gold-lt);}
+.hdr-right button{background:none;border:1px solid #D8CFA8;color:#F3EFE1;padding:5px 10px;border-radius:4px;font-size:.75rem;cursor:pointer;margin-top:4px;}
+.badge{display:inline-block;font-family:system-ui,sans-serif;font-size:.7rem;padding:2px 8px;border-radius:10px;background:var(--bg);border:1px solid var(--line);margin-left:6px;}
+.copy-label{display:inline-block;font-family:system-ui,sans-serif;font-size:.7rem;font-weight:700;letter-spacing:.03em;color:var(--gold-lt);background:var(--green-dk);padding:3px 10px;border-radius:3px;margin-bottom:8px;}
+.cut-line{border:none;border-top:2px dashed var(--line);margin:22px 0;}
+.print-row{display:flex;flex-wrap:wrap;gap:14px;}
+.print-row .doc{flex:1 1 260px;margin:0;}
+.print-modal{position:fixed;inset:0;background:var(--bg);z-index:60;overflow:auto;padding:20px;}
+.print-modal-inner{max-width:1100px;margin:0 auto;}
+.photo-box{width:110px;height:132px;border:2px dashed var(--line);display:flex;align-items:center;justify-content:center;text-align:center;font-family:system-ui,sans-serif;font-size:.72rem;color:var(--muted);overflow:hidden;flex-shrink:0;background:var(--bg);}
+.photo-box img{width:100%;height:100%;object-fit:cover;}
+.sec{font-family:system-ui,sans-serif;font-size:.8rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--gold);border-bottom:1px solid var(--line);padding-bottom:4px;margin:22px 0 4px;}
+.photo-row{display:flex;gap:16px;align-items:center;flex-wrap:wrap;}
+.reg-form table{display:table;width:100%;}
+.reg-form td{white-space:normal;}
+.reg-form .lbl{color:var(--muted);width:19%;}
+.reg-form h4{margin:12px 0 2px;color:var(--green);font-size:.85rem;font-family:system-ui,sans-serif;text-transform:uppercase;}
+.greet{font-family:system-ui,sans-serif;font-size:1.05rem;color:#fff;letter-spacing:.03em;margin-bottom:6px;text-shadow:0 2px 6px rgba(0,0,0,.4);}
+.greet b{color:rgb(217,164,65);}
+@media print{
+  @page{size:A4 landscape;margin:8mm;}
+  @page regform{size:A4 portrait;margin:10mm;}
+  header,nav,.no-print,.cut-line{display:none!important;}
+  html,body{background:#fff!important;height:auto;}
+  body{background-image:none!important;color:#000;}
+  body.printing-modal main{display:none!important;}
+  main{max-width:100%;padding:0;}
+  .card{border:none;padding:0;background:#fff;}
+  .print-modal{position:static!important;padding:0;background:#fff;overflow:visible;}
+  .print-modal-inner{max-width:none;margin:0;}
+  .doc{border:1px solid #000;color:#000;background:#fff;}
+  .print-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));width:100%;height:190mm;break-inside:avoid;page-break-inside:avoid;}
+  .print-row .doc{margin:0;border-right:none;border-radius:0;padding:10px;font-size:11px;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
+  .print-row .doc:last-child{border-right:1px solid #000;}
+  .print-row .doc h3{font-size:14px;}
+  .print-row .doc .doc-head{flex-wrap:wrap;gap:4px;margin-bottom:8px;padding-bottom:8px;}
+  .doc table{display:table;width:100%;font-size:11px;}
+  .doc th,.doc td{white-space:normal;word-break:break-word;padding:4px 3px;}
+  .print-row .doc .sign{margin-top:auto;padding-top:24px;}
+  .print-row .doc .sign div{width:44%;}
+  .copy-label{color:#000;background:none;border:1px solid #000;}
+  .reg-form{page:regform;border:none;font-size:11px;}
+  .reg-form .lbl{color:#000;}
+  .photo-box{border:1px solid #000!important;}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="crest">IPS</div>
+  <div>
+    <h1>IQRA Public School</h1>
+    <p>Banda Sheikh Ismail, Nowshera, Khyber Pakhtunkhwa, Pakistan</p>
+  </div>
+  <div class="hdr-right no-print" id="hdrUser"></div>
+</header>
+<div id="login">
+  <div class="login-hero">
+    <svg class="scene" viewBox="0 0 500 260" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="440" cy="40" r="26" fill="rgb(217,164,65)" opacity="0.85"/>
+      <rect x="60" y="120" width="150" height="80" rx="4" fill="rgb(20,30,25)" opacity="0.35"/>
+      <text x="135" y="168" font-family="Georgia,serif" font-size="30" fill="rgb(217,164,65)" text-anchor="middle" opacity="0.7">ABC</text>
+      <g opacity="0.95">
+        <circle cx="270" cy="185" r="20" fill="rgb(241,194,125)"/>
+        <path d="M270 162 Q252 159 250 172 Q270 166 290 172 Q288 159 270 162 Z" fill="rgb(59,35,20)"/>
+        <path d="M252 240 L258 200 Q270 190 282 200 L288 240 Z" fill="rgb(217,164,65)"/>
+      </g>
+      <g opacity="0.95">
+        <circle cx="330" cy="190" r="20" fill="rgb(232,181,137)"/>
+        <path d="M312 180 Q330 165 348 180 Q348 170 330 167 Q312 170 312 180 Z" fill="rgb(36,22,9)"/>
+        <path d="M312 240 L318 205 Q330 197 342 205 L348 240 Z" fill="rgb(15,76,58)"/>
+      </g>
+      <g opacity="0.95">
+        <circle cx="380" cy="185" r="18" fill="rgb(241,194,125)"/>
+        <path d="M380 165 Q365 163 363 174 Q380 169 397 174 Q395 163 380 165 Z" fill="rgb(59,35,20)"/>
+        <path d="M364 240 L369 202 Q380 194 391 202 L396 240 Z" fill="rgb(184,134,11)"/>
+      </g>
+      <path d="M90 70 l3 7 7 1-5 5 1 7-6-4-6 4 1-7-5-5 7-1z" fill="rgb(217,164,65)" opacity="0.6"/>
+      <path d="M420 130 l3 7 7 1-5 5 1 7-6-4-6 4 1-7-5-5 7-1z" fill="rgb(217,164,65)" opacity="0.6"/>
+    </svg>
+    <div class="htext">
+      <div class="greet" id="greet"></div>
+      <h1>IQRA Public School</h1>
+      <p>Your Children Are Safe With Us</p>
+    </div>
+    <svg class="wave" viewBox="0 0 500 44" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0,20 C90,45 160,0 250,10 C340,20 410,45 500,15 L500,44 L0,44 Z" fill="var(--bg)"/>
+    </svg>
+  </div>
+  <div class="login-box-wrap">
+  <div class="login-box">
+    <div class="crest">IPS</div>
+    <h2 style="margin:0 0 2px">Welcome Back</h2>
+    <p class="sub">Sign in to continue</p>
+    <label style="text-align:left">User Name</label><input id="lg_user" placeholder="admin">
+    <label style="text-align:left">Password</label><input id="lg_pass" type="password" placeholder="admin">
+    <button class="btn" style="width:100%" onclick="doLogin()">Login</button>
+    <p class="sub" style="margin-top:10px">Default admin login: admin / admin</p>
+  </div>
+  </div>
+</div>
+<nav class="no-print" id="nav" style="display:none"></nav>
+<main id="app" style="display:none"></main>
+<div id="printModal" class="print-modal" style="display:none">
+  <div class="print-modal-inner">
+    <button class="btn ghost no-print" style="margin-bottom:14px" onclick="closePrintModal()">✕ Close</button>
+    <button class="btn gold no-print" style="margin-bottom:14px;margin-left:8px" onclick="window.print()">Print</button>
+    <div id="printModalBody"></div>
+  </div>
+</div>
+
+<script>
+const CLASSES = ["Play Group","Nursery","Prep (KG)","Class 1","Class 2","Class 3","Class 4","Class 5","Class 6","Class 7","Class 8","Class 9 (Matric-I)","Class 10 (Matric-II)"];
+const FEE_HEADS = ["Admission Fee","Tuition Fee","Exam Fee","Transport Fee","Fine / Other"];
+const FEE_CATEGORIES = ["Admission Fee","Tuition Fee","Exam Fee","Transport Fee","Library Fee","Sports Fee","Annual Fund","Fine / Other"];
+const VOUCHER_CATEGORIES = ["Stationery","Books & Publications","Furniture & Fixtures","Repair & Maintenance","Utility Bills","Transport / Fuel","Salaries & Wages","Sports & Events","Miscellaneous"];
+let voucherItems = [{category:VOUCHER_CATEGORIES[0], desc:'', amount:0}];
+let receiptItems = [{category:FEE_CATEGORIES[0], amount:0}];
+let editingReceiptId = null;
+let editingVoucherId = null;
+let editingUserId = null;
+
+function load(k){ try{ return JSON.parse(localStorage.getItem(k)||"[]"); }catch(e){ return []; } }
+function loadObj(k){ try{ return JSON.parse(localStorage.getItem(k)||"{}"); }catch(e){ return {}; } }
+function save(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+let students = load('ips_students');
+let receipts = load('ips_receipts');
+let vouchers = load('ips_vouchers');
+let teachers = load('ips_teachers');
+let attendance = loadObj('ips_attendance');
+let attDate = todayStr();
+let tab = 'dashboard';
+
+const DEPARTMENTS = ["Admin","Finance","Admission","IT"];
+const DEPT_TABS = {
+  Admin: ['dashboard','enroll','dit','receipt','voucher','attendance','records','users'],
+  Finance: ['dashboard','receipt','voucher','records'],
+  Admission: ['dashboard','enroll','dit','attendance','records'],
+  IT: ['dashboard','records']
+};
+const TAB_LABELS = {dashboard:'Dashboard',enroll:'Admission',dit:'DIT Admission',receipt:'Fee Receipt',voucher:'Payment Voucher',attendance:'Teacher Attendance',records:'Records',users:'User Accounts'};
+
+let currentUser = null;
+
+function ensureAuth(){
+  let users = load('ips_users');
+  if(!users.length){
+    users = [{id:1, username:'admin', password:'admin', name:'Administrator', department:'Admin'}];
+    save('ips_users', users);
+  }
+}
+function doLogin(){
+  ensureAuth();
+  const users = load('ips_users');
+  const u = document.getElementById('lg_user').value.trim();
+  const p = document.getElementById('lg_pass').value;
+  const found = users.find(x=>x.username===u && x.password===p);
+  if(found){
+    sessionStorage.setItem('ips_session', String(found.id));
+    enterApp(found);
+  } else alert('Incorrect user name or password.');
+}
+function enterApp(user){
+  currentUser = user;
+  document.getElementById('login').style.display='none';
+  document.getElementById('nav').style.display='flex';
+  document.getElementById('app').style.display='block';
+  document.getElementById('hdrUser').innerHTML = `${user.name}<div class="dept">${user.department} Department</div><button onclick="logout()">Logout</button>`;
+  const allowed = DEPT_TABS[user.department] || ['dashboard'];
+  if(!allowed.includes(tab)) tab = allowed[0];
+  render();
+}
+function checkSession(){
+  ensureAuth();
+  const sid = sessionStorage.getItem('ips_session');
+  if(sid){
+    const users = load('ips_users');
+    const found = users.find(x=>String(x.id)===sid);
+    if(found){ enterApp(found); return; }
+  }
+}
+function logout(){ sessionStorage.removeItem('ips_session'); location.reload(); }
+
+function usersView(){
+  const users = load('ips_users');
+  const editing = editingUserId ? users.find(u=>u.id===editingUserId) : null;
+  const rows = users.map(u=>`<tr><td>${u.username}</td><td>${u.name}</td><td>${u.department}</td>
+    <td><button class="btn ghost no-print" style="padding:4px 8px;margin:0 4px 0 0" onclick="editUser(${u.id})">Edit</button>
+    <button class="btn danger no-print" style="padding:4px 8px;margin:0" onclick="delUser(${u.id})" ${u.username==='admin'?'disabled':''}>Remove</button></td></tr>`).join('');
+  return `
+  <div class="card">
+    <h2>${editing?'Edit User Account':'User Accounts'}</h2>
+    <p class="sub">${editing?`Editing ${editing.username} — leave password unchanged to keep it the same.`:'Create a login for each department — Finance, Admission, IT, or Admin (full access).'}</p>
+    <div class="row">
+      <div><label>Full Name</label><input id="u_name" value="${editing?editing.name:''}"></div>
+      <div><label>Department</label><select id="u_dept">${DEPARTMENTS.map(d=>`<option ${editing&&editing.department===d?'selected':''}>${d}</option>`).join('')}</select></div>
+    </div>
+    <div class="row">
+      <div><label>User Name</label><input id="u_user" value="${editing?editing.username:''}"></div>
+      <div><label>${editing?'New Password (optional)':'Password'}</label><input id="u_pass" type="text" placeholder="${editing?'leave blank to keep current':''}"></div>
+    </div>
+    <div class="actions">
+      <button class="btn" onclick="saveUser()">${editing?'Update User':'Add User'}</button>
+      ${editing?'<button class="btn ghost" onclick="editingUserId=null;render()">Cancel</button>':''}
+    </div>
+  </div>
+  <div class="card">
+    <h2>Existing Accounts</h2>
+    <table><tr><th>User Name</th><th>Name</th><th>Department</th><th></th></tr>${rows}</table>
+  </div>`;
+}
+function editUser(id){ editingUserId = id; render(); }
+function saveUser(){
+  const uname = document.getElementById('u_user').value.trim();
+  const name = document.getElementById('u_name').value.trim();
+  const pass = document.getElementById('u_pass').value;
+  const dept = document.getElementById('u_dept').value;
+  if(!uname||!name){ alert('Please fill in name and user name.'); return; }
+  let users = load('ips_users');
+  if(editingUserId){
+    const u = users.find(x=>x.id===editingUserId);
+    if(users.find(x=>x.username===uname && x.id!==editingUserId)){ alert('That user name is already taken.'); return; }
+    u.username = uname; u.name = name; u.department = dept;
+    if(pass) u.password = pass;
+    editingUserId = null;
+  } else {
+    if(!pass){ alert('Please set a password.'); return; }
+    if(users.find(u=>u.username===uname)){ alert('That user name is already taken.'); return; }
+    users.push({id:Date.now(), username:uname, password:pass, name, department:dept});
+  }
+  save('ips_users', users);
+  const refreshed = users.find(x=>String(x.id)===sessionStorage.getItem('ips_session'));
+  if(refreshed){ currentUser = refreshed; document.getElementById('hdrUser').innerHTML = `${refreshed.name}<div class="dept">${refreshed.department} Department</div><button onclick="logout()">Logout</button>`; }
+  render();
+}
+function delUser(id){
+  let users = load('ips_users');
+  users = users.filter(u=>u.id!==id);
+  save('ips_users', users);
+  render();
+}
+
+function dashboardView(){
+  const dept = currentUser ? currentUser.department : 'Admin';
+  const total = students.length;
+  const active = students.filter(s=>s.status!=='Left').length;
+  const left = total - active;
+  const male = students.filter(s=>s.gender==='Male').length;
+  const female = students.filter(s=>s.gender==='Female').length;
+  const dit = students.filter(s=>s.dit).length;
+
+  let out = `<div class="card" style="text-align:center;padding-top:10px">
+    <svg viewBox="0 0 500 160" style="width:100%;max-width:420px;height:auto;margin-bottom:6px" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="250" cy="150" rx="210" ry="7" fill="rgb(184,134,11)" opacity="0.15"/>
+      <path d="M90 42 l3 7 7 1-5 5 1 7-6-4-6 4 1-7-5-5 7-1z" fill="rgb(217,164,65)"/>
+      <path d="M410 52 l3 7 7 1-5 5 1 7-6-4-6 4 1-7-5-5 7-1z" fill="rgb(217,164,65)"/>
+      <circle cx="150" cy="70" r="26" fill="rgb(241,194,125)"/>
+      <path d="M150 44 Q128 40 126 56 Q150 49 174 56 Q172 40 150 44 Z" fill="rgb(59,35,20)"/>
+      <circle cx="126" cy="56" r="9" fill="rgb(59,35,20)"/>
+      <circle cx="174" cy="56" r="9" fill="rgb(59,35,20)"/>
+      <path d="M112 150 L121 100 Q150 86 179 100 L188 150 Z" fill="rgb(217,164,65)"/>
+      <rect x="127" y="106" width="46" height="32" rx="3" fill="white" stroke="rgb(15,76,58)" stroke-width="2"/>
+      <line x1="150" y1="106" x2="150" y2="138" stroke="rgb(15,76,58)" stroke-width="2"/>
+      <circle cx="335" cy="72" r="26" fill="rgb(232,181,137)"/>
+      <path d="M309 62 Q335 42 361 62 Q361 50 335 46 Q309 50 309 62 Z" fill="rgb(36,22,9)"/>
+      <path d="M300 150 L310 104 Q335 92 360 104 L370 150 Z" fill="rgb(15,76,58)"/>
+      <rect x="313" y="109" width="46" height="32" rx="3" fill="white" stroke="rgb(184,134,11)" stroke-width="2"/>
+      <line x1="335" y1="109" x2="335" y2="141" stroke="rgb(184,134,11)" stroke-width="2"/>
+    </svg>
+    <h2>${greetText()[0]}, ${currentUser?currentUser.name:''} ${greetText()[1]}</h2><p class="sub">Live summary for the ${dept} department.</p>
+    <div class="kpi-grid">
+      <div class="kpi"><div class="n">${total}</div><div class="l">Total Strength</div></div>
+      <div class="kpi"><div class="n">${active}</div><div class="l">Active Students</div></div>
+      <div class="kpi"><div class="n">${left}</div><div class="l">Left Students</div></div>
+      <div class="kpi"><div class="n">${dit}</div><div class="l">DIT Students</div></div>
+    </div></div>`;
+
+  if(dept==='Admin' || dept==='Admission'){
+    const classCounts = CLASSES.map(c=>({c, n: students.filter(s=>!s.dit && s.class===c && s.status!=='Left').length}));
+    const rows = classCounts.map(x=>`<tr><td>${x.c}</td><td style="text-align:right">${x.n}</td></tr>`).join('');
+    out += `<div class="card"><h2>Admission Summary</h2>
+      <p class="sub">Male: <b>${male}</b> &nbsp; Female: <b>${female}</b> &nbsp; DIT: <b>${dit}</b></p>
+      <table><tr><th>Class</th><th style="text-align:right">Admitted</th></tr>${rows}</table>
+    </div>`;
+  }
+
+  if(dept==='Admin' || dept==='Finance'){
+    const paidReceipts = receipts.filter(r=>r.status==='Paid');
+    const dueReceipts = receipts.filter(r=>r.status!=='Paid');
+    const totalCollected = paidReceipts.reduce((a,r)=>a+r.total,0);
+    const totalDue = dueReceipts.reduce((a,r)=>a+r.total,0);
+    const byPeriod = {};
+    paidReceipts.forEach(r=>{ byPeriod[r.period]=(byPeriod[r.period]||0)+r.total; });
+    const periodKeys = Object.keys(byPeriod).sort((a,b)=>{ const da=new Date(a), db=new Date(b); return (isNaN(da)||isNaN(db)) ? a.localeCompare(b) : da-db; });
+    const periodRows = periodKeys.map(k=>`<tr><td>${k}</td><td style="text-align:right">Rs. ${byPeriod[k].toLocaleString()}</td></tr>`).join('');
+    const byCat = {};
+    paidReceipts.forEach(r=>r.items.forEach(x=>{ byCat[x.category]=(byCat[x.category]||0)+x.amount; }));
+    const catRows = Object.keys(byCat).map(k=>`<tr><td>${k}</td><td style="text-align:right">Rs. ${byCat[k].toLocaleString()}</td></tr>`).join('');
+    out += `<div class="card"><h2>Fee Collection — By Month <span class="badge">Paid only</span></h2>
+      ${periodRows? `<table><tr><th>Fee Period</th><th style="text-align:right">Amount Collected</th></tr>${periodRows}</table>` : '<p class="empty">No paid receipts yet.</p>'}
+    </div>
+    <div class="card"><h2>Fee Collection — By Category</h2>
+      ${catRows? `<table>${catRows}<tr><td class="total">Total Collected (Revenue)</td><td class="total" style="text-align:right">Rs. ${totalCollected.toLocaleString()}</td></tr></table>` : '<p class="empty">No paid receipts yet.</p>'}
+      <p class="sub" style="margin-top:12px">Outstanding / Due: <b style="color:var(--danger)">Rs. ${totalDue.toLocaleString()}</b> (${dueReceipts.length} receipt${dueReceipts.length===1?'':'s'})</p>
+    </div>`;
+  }
+
+  if(dept==='Admin' || dept==='IT'){
+    const userCount = load('ips_users').length;
+    out += `<div class="card"><h2>System Overview</h2>
+      <div class="kpi-grid">
+        <div class="kpi"><div class="n">${userCount}</div><div class="l">User Accounts</div></div>
+        <div class="kpi"><div class="n">${teachers.length}</div><div class="l">Teachers</div></div>
+        <div class="kpi"><div class="n">${receipts.length}</div><div class="l">Fee Receipts</div></div>
+        <div class="kpi"><div class="n">${vouchers.length}</div><div class="l">Payment Vouchers</div></div>
+      </div></div>`;
+  }
+  return out;
+}
+
+function nextNo(prefix, list, field){
+  const n = list.length + 1;
+  return prefix + '-' + String(n).padStart(4,'0');
+}
+function greetText(){ const hr=new Date().getHours(); return hr<12?['Good Morning','☀️']:hr<17?['Good Afternoon','🌤️']:['Good Evening','🌙']; }
+function updateGreet(){ const g=greetText(), el=document.getElementById('greet'); if(el) el.innerHTML=g[1]+' <b>'+g[0]+'</b>'; }
+function todayStr(){ return new Date().toISOString().slice(0,10); }
+function fmtDate(d){ const dt=new Date(d); return dt.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); }
+
+function setTab(t){ tab = t; if(t==='voucher') voucherItems = [{category:VOUCHER_CATEGORIES[0], desc:'', amount:0}]; if(t==='receipt'){ receiptItems = [{category:FEE_CATEGORIES[0], amount:0}]; editingReceiptId=null; } render(); }
+
+function renderNav(){
+  const allowed = currentUser ? (DEPT_TABS[currentUser.department]||['dashboard']) : ['dashboard'];
+  document.getElementById('nav').innerHTML = allowed.map(k =>
+    `<button class="${tab===k?'active':''}" onclick="setTab('${k}')">${TAB_LABELS[k]}</button>`).join('');
+}
+
+function classOptions(sel){
+  return CLASSES.map(c=>`<option ${c===sel?'selected':''}>${c}</option>`).join('');
+}
+function studentOptions(){
+  return students.map(s=>`<option value="${s.id}">${s.regNo} — ${s.name} (${s.class})</option>`).join('');
+}
+
+let pendingPhoto='';
+function fi(id,label,ph,type){ return `<div><label>${label}</label><input id="f_${id}" type="${type||'text'}" placeholder="${ph||''}"></div>`; }
+function fs(id,label,opts){ return `<div><label>${label}</label><select id="f_${id}">${opts.map(o=>`<option>${o}</option>`).join('')}</select></div>`; }
+function pickPhoto(inp){
+  const f=inp.files[0]; if(!f) return;
+  const rd=new FileReader();
+  rd.onload=e=>{ const im=new Image(); im.onload=()=>{
+    const r=Math.min(1,320/Math.max(im.width,im.height)), c=document.createElement('canvas');
+    c.width=Math.round(im.width*r); c.height=Math.round(im.height*r);
+    c.getContext('2d').drawImage(im,0,0,c.width,c.height);
+    pendingPhoto=c.toDataURL('image/jpeg',.8);
+    document.getElementById('photoPrev').innerHTML='<img src="'+pendingPhoto+'">';
+  }; im.src=e.target.result; };
+  rd.readAsDataURL(f);
+}
+function clearPhoto(){ pendingPhoto=''; document.getElementById('photoPrev').innerHTML='No photo<br>selected'; const i=document.getElementById('f_photo'); if(i) i.value=''; }
+
+function enrollForm(isDit){
+  pendingPhoto='';
+  const prefix = isDit ? 'DIT' : 'IPS';
+  const regNo = nextNo(prefix, students.filter(s=>s.dit===isDit));
+  return `
+  <div class="card">
+    <h2>${isDit?'DIT Admission Form':'Student Admission Form'}</h2>
+    <p class="sub">${isDit?'Diploma in Information Technology — Admission Form':'Pre-Education to Matric — Admission Form'} &nbsp;•&nbsp; Reg. No: <b>${regNo}</b></p>
+
+    <div class="sec">Student Photo</div>
+    <div class="photo-row">
+      <div class="photo-box" id="photoPrev">No photo<br>selected</div>
+      <div><input id="f_photo" type="file" accept="image/*" onchange="pickPhoto(this)" style="max-width:260px">
+      <p class="sub" style="margin:6px 0 0">Passport-size photo. On a phone you can take one with the camera.</p>
+      <button class="btn ghost" style="margin-top:6px;padding:5px 10px" onclick="clearPhoto()">Remove photo</button></div>
+    </div>
+
+    <div class="sec">Admission Details</div>
+    <div class="row">
+      ${fi('date','Date of Admission','','date').replace('id="f_date" type="date"','id="f_date" type="date" value="'+todayStr()+'"')}
+      ${fs('status','Status',['Active','Left'])}
+    </div>
+    <div class="row">
+      ${isDit ? fi('class','Batch / Session','e.g. Batch 2026-A')+fi('section','Course Duration','e.g. 6 months')
+              : fs('class','Class',CLASSES)+fi('section','Section','A / B / C')}
+    </div>
+    ${isDit ? `<div class="row">${fi('course','Course / Diploma Name','e.g. DIT')}${fs('shift','Shift',['Morning','Evening'])}</div>
+    <div class="row">${fi('qualification','Last Qualification','e.g. Matric / FSc')}${fi('marks','Marks / Grade Obtained','')}</div>`
+    : `<div class="row">${fs('shift','Shift',['Morning','Evening'])}${fi('lastClass','Last Class Passed','')}</div>`}
+
+    <div class="sec">Student Personal Information</div>
+    <div class="row">${fi('name','Student Full Name','e.g. Ahmad Khan')}${fi('cnic','CNIC / B-Form No.','XXXXX-XXXXXXX-X')}</div>
+    <div class="row">${fi('dob','Date of Birth','','date')}${fs('gender','Gender',['Male','Female'])}</div>
+    <div class="row">${fi('religion','Religion','Islam')}${fi('nationality','Nationality','Pakistani')}</div>
+    <div class="row">${fs('blood','Blood Group',['Unknown','A+','A-','B+','B-','AB+','AB-','O+','O-'])}${fi('email','Email (optional)','','email')}</div>
+
+    <div class="sec">Parent / Guardian Information</div>
+    <div class="row">${fi('father',"Father's Name",'')}${fi('fcnic',"Father's CNIC",'XXXXX-XXXXXXX-X')}</div>
+    <div class="row">${fi('foccup',"Father's Occupation",'')}${fi('mother',"Mother's Name",'')}</div>
+    <div class="row">${fi('guardian','Guardian Name (if not father)','')}${fi('guardianRel','Relation with Student','')}</div>
+
+    <div class="sec">Contact Information</div>
+    <div class="row">${fi('contact','Contact Number','03XX-XXXXXXX')}${fi('contact2','Emergency Contact Number','03XX-XXXXXXX')}</div>
+    <label>Home Address</label><textarea id="f_address" rows="2"></textarea>
+
+    <div class="sec">Previous Education</div>
+    <div class="row">${fi('prevSchool','Previous School / Institute','')}${fi('leaveReason','Reason for Leaving','')}</div>
+
+    <div class="sec">Health &amp; Other</div>
+    <div class="row">${fi('siblings','Brothers / Sisters in this School','e.g. 2')}${fi('medical','Medical Condition / Allergies','None')}</div>
+    <div class="row">${fs('transport','Transport Required',['No','Yes'])}${fi('route','Transport Route / Area','')}</div>
+
+    <div class="sec">Fee Details</div>
+    <div class="row">${fi('fee','Monthly Fee (Rs.)','0','number')}${fi('discount','Discount / Concession (Rs.)','0','number')}</div>
+    <div class="row">${fi('admFee','Admission Fee Paid (Rs.)','0','number')}${fi('remarks','Remarks','')}</div>
+
+    <button class="btn" onclick="saveStudent(${isDit})">Save &amp; Generate Admission Form</button>
+  </div>`;
+}
+
+const STUDENT_FIELDS=['date','status','class','section','course','shift','qualification','marks','lastClass','name','cnic','dob','gender','religion','nationality','blood','email','father','fcnic','foccup','mother','guardian','guardianRel','contact','contact2','address','prevSchool','leaveReason','siblings','medical','transport','route','fee','discount','admFee','remarks'];
+function saveStudent(isDit){
+  const prefix = isDit?'DIT':'IPS';
+  const name = document.getElementById('f_name').value.trim();
+  if(!name){ alert('Please enter the student name.'); return; }
+  const s = { id: Date.now(), dit: isDit, regNo: nextNo(prefix, students.filter(x=>x.dit===isDit)), photo: pendingPhoto };
+  STUDENT_FIELDS.forEach(k=>{ const el=document.getElementById('f_'+k); s[k]= el ? el.value : ''; });
+  s.name = name; s.fee = s.fee || 0;
+  students.push(s); save('ips_students', students);
+  render();
+  viewRegForm(s.id);
+}
+
+function regFormHTML(s){
+  const v = x => (x===undefined||x===null||x==='') ? '—' : x;
+  const pr = list => { let o=''; for(let i=0;i<list.length;i+=2){ const a=list[i], b=list[i+1]||['','']; o+=`<tr><td class="lbl">${a[0]}</td><td><b>${v(a[1])}</b></td><td class="lbl">${b[0]}</td><td><b>${b[0]?v(b[1]):''}</b></td></tr>`; } return `<table>${o}</table>`; };
+  const acad = s.dit
+    ? [['Batch / Session',s.class],['Duration',s.section],['Course',s.course],['Shift',s.shift],['Last Qualification',s.qualification],['Marks / Grade',s.marks]]
+    : [['Class',s.class],['Section',s.section],['Shift',s.shift],['Last Class Passed',s.lastClass]];
+  return `
+  <div class="doc reg-form" style="max-width:800px;margin:0 auto">
+    <div class="doc-head">
+      <div><h3 style="font-size:1.3rem">IQRA Public School</h3>
+        <span style="font-family:system-ui,sans-serif;font-size:.8rem;color:var(--muted)">Banda Sheikh Ismail, Nowshera, Khyber Pakhtunkhwa</span>
+        <div style="font-family:system-ui,sans-serif;font-weight:700;margin-top:8px">${s.dit?'DIT (DIPLOMA IN INFORMATION TECHNOLOGY) ADMISSION FORM':'STUDENT ADMISSION FORM'}</div>
+        <div style="font-family:system-ui,sans-serif;font-size:.85rem;margin-top:4px">Reg. No: <b>${s.regNo}</b> &nbsp; Date: <b>${s.date?fmtDate(s.date):'—'}</b> &nbsp; Status: <b>${v(s.status)}</b></div></div>
+      <div class="photo-box" style="border-style:solid">${s.photo?`<img src="${s.photo}">`:'Paste<br>Passport<br>Photo'}</div>
+    </div>
+    <h4>Admission Details</h4>${pr(acad)}
+    <h4>Student Information</h4>${pr([['Full Name',s.name],['CNIC / B-Form',s.cnic],['Date of Birth',s.dob?fmtDate(s.dob):''],['Gender',s.gender],['Religion',s.religion],['Nationality',s.nationality],['Blood Group',s.blood],['Email',s.email]])}
+    <h4>Parent / Guardian</h4>${pr([["Father's Name",s.father],["Father's CNIC",s.fcnic],["Father's Occupation",s.foccup],["Mother's Name",s.mother],['Guardian',s.guardian],['Relation',s.guardianRel]])}
+    <h4>Contact</h4>${pr([['Contact No.',s.contact],['Emergency No.',s.contact2]])}
+    <table><tr><td class="lbl">Address</td><td><b>${v(s.address)}</b></td></tr></table>
+    <h4>Previous Education &amp; Health</h4>${pr([['Previous School',s.prevSchool],['Reason for Leaving',s.leaveReason],['Siblings in School',s.siblings],['Medical / Allergies',s.medical],['Transport',s.transport],['Route',s.route]])}
+    <h4>Fee Details</h4>${pr([['Monthly Fee','Rs. '+Number(s.fee||0).toLocaleString()],['Discount','Rs. '+Number(s.discount||0).toLocaleString()],['Admission Fee Paid','Rs. '+Number(s.admFee||0).toLocaleString()],['Remarks',s.remarks]])}
+    <p style="font-family:system-ui,sans-serif;font-size:.78rem;margin:14px 0 0">I declare that the information given above is correct. I agree to follow the rules and regulations of the school and to pay the fee on time.</p>
+    <div class="sign" style="margin-top:44px"><div>Parent / Guardian</div><div>Admission Officer</div><div>Principal</div></div>
+  </div>`;
+}
+function viewRegForm(id){
+  const s = students.find(x=>x.id===id); if(!s) return;
+  document.getElementById('printModalBody').innerHTML = regFormHTML(s);
+  document.getElementById('printModal').style.display='block';
+  document.body.classList.add('printing-modal');
+}
+
+function receiptItemRow(item, i){
+  return `<div class="row" style="grid-template-columns:1.4fr .8fr auto;align-items:end" data-rrow="${i}">
+    <div><label>${i===0?'Fee Category':''}</label><select onchange="updateRItem(${i},'category',this.value)">
+      ${FEE_CATEGORIES.map(c=>`<option ${c===item.category?'selected':''}>${c}</option>`).join('')}</select></div>
+    <div><label>${i===0?'Amount (Rs.)':''}</label><input type="number" value="${item.amount}" onchange="updateRItem(${i},'amount',this.value)"></div>
+    <div><button class="btn danger no-print" style="margin:0;padding:9px 10px" onclick="removeRItem(${i})">✕</button></div>
+  </div>`;
+}
+function updateRItem(i, field, val){ receiptItems[i][field] = field==='amount' ? Number(val)||0 : val; render(); }
+function addRItem(){ receiptItems.push({category:FEE_CATEGORIES[0], amount:0}); render(); }
+function removeRItem(i){ if(receiptItems.length>1) receiptItems.splice(i,1); render(); }
+
+function receiptForm(){
+  const editing = editingReceiptId ? receipts.find(r=>r.id===editingReceiptId) : null;
+  if(editing) receiptItems = editing.items.map(x=>({...x}));
+  const rNo = editing ? editing.receiptNo : nextNo('RCT', receipts);
+  const total = receiptItems.reduce((a,x)=>a+x.amount,0);
+  return `
+  <div class="card no-print">
+    <h2>${editing?'Amend Fee Receipt':'Fee Receipt'}</h2>
+    <p class="sub">Receipt No: <b>${rNo}</b>${editing?' — editing existing receipt':' &nbsp;•&nbsp; add one row per fee category being charged'}</p>
+    <div class="row">
+      <div><label>Date</label><input id="r_date" type="date" value="${editing?editing.date:todayStr()}"></div>
+      <div><label>Select Student</label><select id="r_student" ${editing?'disabled':''}>${students.length?studentOptions():'<option value="">No students admitted yet</option>'}</select></div>
+    </div>
+    <label>Fee Period (e.g. September 2026)</label><input id="r_period" value="${editing?editing.period:new Date().toLocaleDateString('en-GB',{month:'long',year:'numeric'})}">
+    <div id="rRows" style="margin-top:10px">${receiptItems.map(receiptItemRow).join('')}</div>
+    <button class="btn ghost no-print" style="margin-top:8px" onclick="addRItem()">+ Add Fee Item</button>
+    <p class="sub" style="margin:14px 0 0">Total: <b style="color:var(--green);font-size:1.05rem">Rs. ${total.toLocaleString()}</b></p>
+    <div class="row" style="margin-top:6px">
+      <div><label>Payment Status</label><select id="r_status">
+        <option ${(!editing||editing.status==='Due')?'selected':''}>Due</option>
+        <option ${editing&&editing.status==='Paid'?'selected':''}>Paid</option>
+      </select></div>
+      <div><label>Received By</label><input id="r_by" placeholder="Accountant name" value="${editing?editing.by:''}"></div>
+    </div>
+    <div class="actions">
+      <button class="btn" onclick="genReceipt()">${editing?'Update Receipt':'Generate Receipt'}</button>
+      ${editing?'<button class="btn ghost" onclick="editingReceiptId=null;render()">Cancel</button>':''}
+    </div>
+  </div>
+  <div id="doc_out"></div>`;
+}
+
+function genReceipt(){
+  const editing = editingReceiptId ? receipts.find(r=>r.id===editingReceiptId) : null;
+  const stu = editing ? {name:editing.studentName, regNo:editing.regNo, class:editing.class} : students.find(s=>String(s.id)===String(document.getElementById('r_student').value));
+  if(!stu){ alert('Please admit a student first, or select one.'); return; }
+  const items = receiptItems.filter(x=>x.amount>0);
+  const total = items.reduce((a,x)=>a+x.amount,0);
+  if(!items.length){ alert('Please enter at least one fee amount.'); return; }
+  const data = { date: document.getElementById('r_date').value,
+    studentName: stu.name, regNo: stu.regNo, class: stu.class, period: document.getElementById('r_period').value,
+    items, total, status: document.getElementById('r_status').value, by: document.getElementById('r_by').value };
+  let r;
+  if(editing){ Object.assign(editing, data); r = editing; editingReceiptId = null; }
+  else { r = { id:Date.now(), receiptNo: nextNo('RCT', receipts), ...data }; receipts.push(r); }
+  save('ips_receipts', receipts);
+  document.getElementById('doc_out').innerHTML = receiptDocOut(r);
+}
+function toggleReceiptStatus(id){
+  const r = receipts.find(x=>x.id===id); if(!r) return;
+  r.status = r.status==='Paid' ? 'Due' : 'Paid';
+  save('ips_receipts', receipts); render();
+}
+function receiptCopyHTML(r, label){
+  const paid = r.status==='Paid';
+  return `
+  <div class="doc">
+    <div class="copy-label">${label}</div>
+    <div class="doc-head">
+      <div><h3>IQRA Public School</h3><span style="font-family:system-ui,sans-serif;font-size:.8rem;color:var(--muted)">Banda Sheikh Ismail, Nowshera</span></div>
+      <div class="no">Receipt No: <b>${r.receiptNo}</b><br>Date: ${fmtDate(r.date)}<br>
+        <span style="display:inline-block;margin-top:4px;padding:2px 10px;border-radius:3px;font-weight:700;font-size:.75rem;${paid?'background:#DCEFE3;color:#0F4C3A':'background:#F6DEDA;color:#8C2F24'}">${paid?'PAID':'DUE'}</span></div>
+    </div>
+    <table>
+      <tr><td>Student Name</td><td><b>${r.studentName}</b></td><td>Reg. No</td><td><b>${r.regNo}</b></td></tr>
+      <tr><td>Class</td><td>${r.class}</td><td>Fee Period</td><td>${r.period}</td></tr>
+    </table>
+    <table style="margin-top:10px">
+      ${r.items.map(x=>`<tr><td>${x.category}</td><td style="text-align:right">Rs. ${x.amount.toLocaleString()}</td></tr>`).join('')}
+      <tr><td class="total">Total ${paid?'Paid':'Payable'}</td><td class="total" style="text-align:right">Rs. ${r.total.toLocaleString()}</td></tr>
+    </table>
+    <div class="sign"><div>${r.by||'Accountant'}</div><div>School Stamp</div></div>
+  </div>`;
+}
+function receiptPrintRows(r){
+  return '<div class="print-row">' + receiptCopyHTML(r,'Administration Copy')
+    + receiptCopyHTML(r,'Finance Copy')
+    + receiptCopyHTML(r,'Student Copy') + '</div>';
+}
+function receiptDocOut(r){
+  return receiptPrintRows(r) + '<div class="actions no-print" style="margin-top:16px"><button class="btn gold" onclick="window.print()">Print All 3 Copies</button></div>';
+}
+function viewReceipt(id){
+  const r = receipts.find(x=>x.id===id); if(!r) return;
+  document.getElementById('printModalBody').innerHTML = receiptPrintRows(r);
+  document.getElementById('printModal').style.display='block';
+  document.body.classList.add('printing-modal');
+}
+function closePrintModal(){
+  document.getElementById('printModal').style.display='none';
+  document.body.classList.remove('printing-modal');
+}
+function editReceipt(id){ editingReceiptId = id; tab='receipt'; render(); }
+function delReceipt(id){ if(!confirm('Delete this receipt permanently?')) return; receipts = receipts.filter(r=>r.id!==id); save('ips_receipts',receipts); render(); }
+
+function voucherItemRow(item, i){
+  return `<div class="row" style="grid-template-columns:1.2fr 1.4fr .8fr auto;align-items:end" data-vrow="${i}">
+    <div><label>${i===0?'Category':''}</label><select onchange="updateVItem(${i},'category',this.value)">
+      ${VOUCHER_CATEGORIES.map(c=>`<option ${c===item.category?'selected':''}>${c}</option>`).join('')}</select></div>
+    <div><label>${i===0?'Description':''}</label><input value="${item.desc}" placeholder="e.g. Registers & pens" onchange="updateVItem(${i},'desc',this.value)"></div>
+    <div><label>${i===0?'Amount (Rs.)':''}</label><input type="number" value="${item.amount}" onchange="updateVItem(${i},'amount',this.value)"></div>
+    <div><button class="btn danger no-print" style="margin:0;padding:9px 10px" onclick="removeVItem(${i})">✕</button></div>
+  </div>`;
+}
+function updateVItem(i, field, val){ voucherItems[i][field] = field==='amount' ? Number(val)||0 : val; renderVoucherRows(); }
+function addVItem(){ voucherItems.push({category:VOUCHER_CATEGORIES[0], desc:'', amount:0}); render(); }
+function removeVItem(i){ if(voucherItems.length>1) voucherItems.splice(i,1); render(); }
+function renderVoucherRows(){
+  const total = voucherItems.reduce((a,x)=>a+x.amount,0);
+  const el = document.getElementById('vRows');
+  if(el) el.innerHTML = voucherItems.map(voucherItemRow).join('');
+  const t = document.getElementById('vTotal');
+  if(t) t.textContent = 'Rs. ' + total.toLocaleString();
+}
+
+function voucherForm(){
+  const editing = editingVoucherId ? vouchers.find(v=>v.id===editingVoucherId) : null;
+  if(editing) voucherItems = editing.items.map(x=>({...x}));
+  const total = voucherItems.reduce((a,x)=>a+x.amount,0);
+  return `
+  <div class="card no-print">
+    <h2>${editing?'Amend Payment Voucher':'Payment Voucher'}</h2>
+    <p class="sub">Voucher No: <b>${editing?editing.voucherNo:nextNo('PV', vouchers)}</b>${editing?' — editing existing voucher':' &nbsp;•&nbsp; For school expenses — add one row per expense category'}</p>
+    <div class="row">
+      <div><label>Date</label><input id="v_date" type="date" value="${editing?editing.date:todayStr()}"></div>
+      <div><label>Paid To</label><input id="v_to" placeholder="Vendor / staff / party name" value="${editing?editing.to:''}"></div>
+    </div>
+    <div id="vRows">${voucherItems.map(voucherItemRow).join('')}</div>
+    <button class="btn ghost no-print" style="margin-top:8px" onclick="addVItem()">+ Add Expense Item</button>
+    <p class="sub" style="margin:14px 0 0">Total: <b id="vTotal" style="color:var(--green);font-size:1.05rem">Rs. ${total.toLocaleString()}</b></p>
+    <div class="row" style="margin-top:6px">
+      <div><label>Approved By</label><input id="v_appr" placeholder="Principal / Admin" value="${editing?editing.approvedBy:''}"></div>
+      <div><label>Received By</label><input id="v_recv" placeholder="Vendor / staff name" value="${editing?editing.receivedBy:''}"></div>
+    </div>
+    <div class="actions">
+      <button class="btn" onclick="genVoucher()">${editing?'Update Voucher':'Generate Voucher'}</button>
+      ${editing?'<button class="btn ghost" onclick="editingVoucherId=null;render()">Cancel</button>':''}
+    </div>
+  </div>
+  <div id="doc_out"></div>`;
+}
+
+function genVoucher(){
+  const to = document.getElementById('v_to').value.trim();
+  const items = voucherItems.filter(x=>x.amount>0);
+  const total = items.reduce((a,x)=>a+x.amount,0);
+  if(!to || !items.length){ alert('Please enter payee and at least one expense amount.'); return; }
+  const data = { date: document.getElementById('v_date').value, to, items, amount: total,
+    approvedBy: document.getElementById('v_appr').value, receivedBy: document.getElementById('v_recv').value };
+  let v;
+  if(editingVoucherId){ v = vouchers.find(x=>x.id===editingVoucherId); Object.assign(v, data); editingVoucherId = null; }
+  else { v = { id:Date.now(), voucherNo: nextNo('PV', vouchers), ...data }; vouchers.push(v); }
+  save('ips_vouchers', vouchers);
+  document.getElementById('doc_out').innerHTML = voucherDocOut(v);
+}
+function voucherCopyHTML(v, label){
+  return `
+  <div class="doc">
+    <div class="copy-label">${label}</div>
+    <div class="doc-head">
+      <div><h3>IQRA Public School</h3><span style="font-family:system-ui,sans-serif;font-size:.8rem;color:var(--muted)">Banda Sheikh Ismail, Nowshera</span></div>
+      <div class="no">Voucher No: <b>${v.voucherNo}</b><br>Date: ${fmtDate(v.date)}</div>
+    </div>
+    <table><tr><td>Paid To</td><td colspan="3"><b>${v.to}</b></td></tr></table>
+    <table style="margin-top:10px">
+      <tr><th>Category</th><th>Description</th><th style="text-align:right">Amount</th></tr>
+      ${v.items.map(x=>`<tr><td>${x.category}</td><td>${x.desc||'—'}</td><td style="text-align:right">Rs. ${x.amount.toLocaleString()}</td></tr>`).join('')}
+      <tr><td class="total" colspan="2">Total Amount</td><td class="total" style="text-align:right">Rs. ${v.amount.toLocaleString()}</td></tr>
+    </table>
+    <div class="sign"><div>${v.approvedBy||'Approved By'}</div><div>${v.receivedBy||'Received By'}</div></div>
+  </div>`;
+}
+function voucherPrintRows(v){
+  return '<div class="print-row">' + voucherCopyHTML(v,'Administration Copy')
+    + voucherCopyHTML(v,'Finance Copy')
+    + voucherCopyHTML(v,'Receiver Copy') + '</div>';
+}
+function voucherDocOut(v){
+  return voucherPrintRows(v) + '<div class="actions no-print" style="margin-top:16px"><button class="btn gold" onclick="window.print()">Print All 3 Copies</button></div>';
+}
+function viewVoucher(id){
+  const v = vouchers.find(x=>x.id===id); if(!v) return;
+  document.getElementById('printModalBody').innerHTML = voucherPrintRows(v);
+  document.getElementById('printModal').style.display='block';
+  document.body.classList.add('printing-modal');
+}
+function editVoucher(id){ editingVoucherId = id; tab='voucher'; render(); }
+function delVoucher(id){ if(!confirm('Delete this voucher permanently?')) return; vouchers = vouchers.filter(v=>v.id!==id); save('ips_vouchers',vouchers); render(); }
+
+function delStudent(id){ if(!currentUser||currentUser.department!=='Admin'){alert('Only Admin can remove records.');return;} if(!confirm('Remove this student permanently?'))return; students = students.filter(s=>s.id!==id); save('ips_students',students); render(); }
+
+function saveTeacher(){
+  const name = document.getElementById('t_name').value.trim();
+  if(!name){ alert('Please enter the teacher name.'); return; }
+  teachers.push({ id:Date.now(), name, designation: document.getElementById('t_desig').value, contact: document.getElementById('t_contact').value });
+  save('ips_teachers', teachers);
+  render();
+}
+function delTeacher(id){
+  if(!currentUser||currentUser.department!=='Admin'){ alert('Only Admin can remove teachers.'); return; }
+  if(!confirm('Remove this teacher permanently?')) return;
+  teachers = teachers.filter(t=>t.id!==id); save('ips_teachers', teachers); render();
+}
+function setAttDate(d){ attDate = d; render(); }
+function markAtt(tid, status){
+  if(!attendance[attDate]) attendance[attDate] = {};
+  attendance[attDate][tid] = status;
+  save('ips_attendance', attendance);
+}
+function attendanceView(){
+  const dayRec = attendance[attDate] || {};
+  const counts = {Present:0, Absent:0, Leave:0, 'Half Day':0};
+  teachers.forEach(t=>{ const s = dayRec[t.id]; if(s) counts[s]=(counts[s]||0)+1; });
+  const rows = teachers.map(t=>`<tr>
+    <td>${t.name}</td><td>${t.designation||'—'}</td>
+    <td><select onchange="markAtt(${t.id}, this.value)">
+      ${['Present','Absent','Leave','Half Day'].map(s=>`<option ${dayRec[t.id]===s?'selected':''}>${s}</option>`).join('')}
+    </select></td>
+    <td>${currentUser&&currentUser.department==='Admin'?`<button class="btn danger no-print" style="padding:4px 8px;margin:0" onclick="delTeacher(${t.id})">Remove</button>`:''}</td>
+  </tr>`).join('');
+  return `
+  <div class="card no-print">
+    <h2>Add Teacher</h2>
+    <div class="row">
+      <div><label>Full Name</label><input id="t_name"></div>
+      <div><label>Designation / Subject</label><input id="t_desig" placeholder="e.g. Science Teacher"></div>
+    </div>
+    <label>Contact Number</label><input id="t_contact" placeholder="03XX-XXXXXXX">
+    <button class="btn" onclick="saveTeacher()">Add Teacher</button>
+  </div>
+  <div class="card">
+    <h2>Daily Attendance</h2>
+    <label>Date</label><input type="date" value="${attDate}" onchange="setAttDate(this.value)" style="max-width:220px">
+    <p class="sub" style="margin-top:10px">Present: <b>${counts.Present}</b> &nbsp; Absent: <b>${counts.Absent}</b> &nbsp; Leave: <b>${counts.Leave}</b> &nbsp; Half Day: <b>${counts['Half Day']}</b></p>
+    ${teachers.length? `<table><tr><th>Name</th><th>Designation</th><th>Status</th><th></th></tr>${rows}</table>`
+      : '<p class="empty">No teachers added yet — add one above.</p>'}
+  </div>`;
+}
+
+let studentSearchQuery = '';
+function searchStudents(){ studentSearchQuery = document.getElementById('stu_search').value.trim().toLowerCase(); render(); }
+function clearStudentSearch(){ studentSearchQuery=''; render(); }
+function viewStudentProfile(id){
+  const s = students.find(x=>x.id===id); if(!s) return;
+  const recs = receipts.filter(r=>r.regNo===s.regNo);
+  const rows = recs.map(r=>`<tr><td>${r.receiptNo}</td><td>${r.period}</td><td>Rs. ${r.total.toLocaleString()}</td>
+    <td><span class="badge" style="${r.status==='Paid'?'color:#0F4C3A;border-color:#0F4C3A':'color:#A23B32;border-color:#A23B32'}">${r.status||'Due'}</span></td></tr>`).join('');
+  document.getElementById('printModalBody').innerHTML = regFormHTML(s) + `
+    <div class="doc no-print" style="max-width:800px;margin:16px auto 0">
+      <h3 style="color:var(--green);margin-top:0">Fee History</h3>
+      ${rows? `<table><tr><th>Receipt No</th><th>Period</th><th>Amount</th><th>Status</th></tr>${rows}</table>` : '<p class="empty">No fee receipts for this student yet.</p>'}
+    </div>`;
+  document.getElementById('printModal').style.display='block';
+  document.body.classList.add('printing-modal');
+}
+function recordsView(){
+  const isAdmin = currentUser && currentUser.department==='Admin';
+  const canMark = currentUser && (currentUser.department==='Admin' || currentUser.department==='Finance');
+  const q = studentSearchQuery;
+  const filteredStudents = q ? students.filter(s=>
+    (s.regNo||'').toLowerCase().includes(q) || (s.cnic||'').toLowerCase().includes(q) ||
+    (s.contact||'').toLowerCase().includes(q) || (s.name||'').toLowerCase().includes(q)
+  ) : students;
+  const rows = filteredStudents.map(s=>`<tr>
+    <td>${s.regNo}</td><td>${s.name}</td><td>${s.father}</td><td>${s.class}</td>
+    <td>${s.contact||'—'}</td><td>${s.dit?'DIT':'School'}</td>
+    <td><button class="btn ghost no-print" style="padding:4px 8px;margin:0 4px 0 0" onclick="viewStudentProfile(${s.id})">View</button>${isAdmin?`<button class="btn danger no-print" style="padding:4px 8px;margin:0" onclick="delStudent(${s.id})">Remove</button>`:''}</td>
+  </tr>`).join('');
+  const rec = receipts.slice().reverse().map(r=>`<tr><td>${r.receiptNo}</td><td>${r.studentName}</td><td>${fmtDate(r.date)}</td><td>Rs. ${r.total.toLocaleString()}</td>
+    <td><span class="badge" style="${r.status==='Paid'?'color:#0F4C3A;border-color:#0F4C3A':'color:#A23B32;border-color:#A23B32'}">${r.status||'Due'}</span></td>
+    <td><button class="btn ghost no-print" style="padding:4px 8px;margin:0 4px 4px 0" onclick="viewReceipt(${r.id})">Print</button>${canMark?`<button class="btn ghost no-print" style="padding:4px 8px;margin:0 4px 4px 0" onclick="toggleReceiptStatus(${r.id})">Mark ${r.status==='Paid'?'Due':'Paid'}</button>`:''}${isAdmin?`<button class="btn ghost no-print" style="padding:4px 8px;margin:0 4px 4px 0" onclick="editReceipt(${r.id})">Amend</button><button class="btn danger no-print" style="padding:4px 8px;margin:0" onclick="delReceipt(${r.id})">Delete</button>`:''}</td></tr>`).join('');
+  const vou = vouchers.slice().reverse().map(v=>`<tr><td>${v.voucherNo}</td><td>${v.to}</td><td>${fmtDate(v.date)}</td><td>Rs. ${v.amount.toLocaleString()}</td>
+    <td><button class="btn ghost no-print" style="padding:4px 8px;margin:0 4px 0 0" onclick="viewVoucher(${v.id})">Print</button>${isAdmin?`<button class="btn ghost no-print" style="padding:4px 8px;margin:0 4px 0 0" onclick="editVoucher(${v.id})">Amend</button><button class="btn danger no-print" style="padding:4px 8px;margin:0" onclick="delVoucher(${v.id})">Delete</button>`:''}</td></tr>`).join('');
+  return `
+  <div class="card no-print">
+    <h2>Search Student</h2>
+    <p class="sub">Search by Registration No, CNIC / B-Form, or Mobile Number</p>
+    <div class="row" style="grid-template-columns:2fr auto auto">
+      <input id="stu_search" value="${studentSearchQuery}" placeholder="e.g. IPS-0001, 17301-1234567-1, 0300-1234567" onkeydown="if(event.key==='Enter')searchStudents()">
+      <button class="btn" onclick="searchStudents()">Search</button>
+      ${studentSearchQuery?'<button class="btn ghost" onclick="clearStudentSearch()">Clear</button>':'<span></span>'}
+    </div>
+  </div>
+  <div class="card">
+    <h2>Admitted Students</h2>
+    ${filteredStudents.length? `<table><tr><th>Reg No</th><th>Name</th><th>Father</th><th>Class</th><th>Contact</th><th>Type</th><th></th></tr>${rows}</table>`
+      : `<p class="empty">${q?'No student matches that search.':'No students admitted yet.'}</p>`}
+  </div>
+  <div class="card">
+    <h2>Fee Receipts</h2>
+    ${!isAdmin?'<p class="sub">Only Admin accounts can amend or delete receipts. Admin and Finance can mark paid/due.</p>':''}
+    ${receipts.length? `<table><tr><th>Receipt No</th><th>Student</th><th>Date</th><th>Amount</th><th>Status</th><th></th></tr>${rec}</table>` : '<p class="empty">No receipts yet.</p>'}
+  </div>
+  <div class="card">
+    <h2>Payment Vouchers</h2>
+    ${!isAdmin?'<p class="sub">Only Admin accounts can amend or delete vouchers.</p>':''}
+    ${vouchers.length? `<table><tr><th>Voucher No</th><th>Paid To</th><th>Date</th><th>Amount</th><th></th></tr>${vou}</table>` : '<p class="empty">No vouchers yet.</p>'}
+  </div>`;
+}
+
+function render(){
+  renderNav();
+  const app = document.getElementById('app');
+  if(tab==='dashboard') app.innerHTML = dashboardView();
+  else if(tab==='enroll') app.innerHTML = enrollForm(false);
+  else if(tab==='dit') app.innerHTML = enrollForm(true);
+  else if(tab==='receipt'){ if(!receiptItems.length) receiptItems=[{category:FEE_CATEGORIES[0],amount:0}]; app.innerHTML = receiptForm(); }
+  else if(tab==='voucher'){ if(!voucherItems.length) voucherItems=[{category:VOUCHER_CATEGORIES[0],desc:'',amount:0}]; app.innerHTML = voucherForm(); }
+  else if(tab==='users') app.innerHTML = usersView();
+  else if(tab==='attendance') app.innerHTML = attendanceView();
+  else app.innerHTML = recordsView();
+}
+updateGreet(); setInterval(updateGreet,60000);
+checkSession();
+render();
+</script>
+</body>
+</html>
